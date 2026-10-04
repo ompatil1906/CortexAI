@@ -1,0 +1,37 @@
+# --- secrets ---
+.env
+.env.*
+!.env.example
+
+# --- python ---
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- macOS ---
+.DS_Store
+
+# --- data (1.3GB source corpus + derived shards) ---
+dataset/
+data/raw/
+data/llm_batches/
+data/labeled/
+data/sft/
+
+# --- model weights ---
+model/
+adapters/
+runs/
+*.safetensors
+*.npz
+*.gguf
+
+# --- inference / eval scratch ---
+.cache/
+*.log
+wandb/

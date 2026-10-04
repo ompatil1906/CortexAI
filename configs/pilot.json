@@ -1,0 +1,22 @@
+{
+  "name": "pilot",
+  "model": "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+  "train_rows": 800,
+  "epochs": 1,
+  "batch_size": 4,
+  "grad_accumulation_steps": 1,
+  "max_seq_length": 640,
+  "num_layers": 16,
+  "learning_rate": 0.0001,
+  "lora": {
+    "rank": 16,
+    "scale": 32.0,
+    "dropout": 0.05
+  },
+  "mask_prompt": true,
+  "grad_checkpoint": true,
+  "val_batches": 20,
+  "steps_per_report": 25,
+  "steps_per_eval": 100,
+  "save_every": 100
+}

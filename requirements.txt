@@ -1,0 +1,27 @@
+# CortexAI — support ticket triage assistant
+#
+# Install into a fresh venv:
+#   python3 -m venv venv
+#   ./venv/bin/python3 -m pip install -r requirements.txt
+#
+# mlx / mlx-lm are Apple-silicon only; they will not install on Linux or Windows.
+
+mlx>=0.32.0
+mlx-lm>=0.32.0
+
+# tokenizer access in build_sft.py
+transformers>=5.0.0
+numpy>=2.0.0
+
+# metrics in evaluate.py
+scikit-learn>=1.5.0
+
+# demo
+gradio>=5.0.0
+
+# --- labelling only -------------------------------------------------------
+# The labelling pipeline deliberately uses no SDK: scripts/llm_client.py speaks
+# HTTP through the standard library. A key is still required, supplied either in
+# the environment or in a .env file at the repo root:
+#   GEMINI_API_KEY=...      # or GOOGLE_API_KEY
+#   OPENAI_API_KEY=...

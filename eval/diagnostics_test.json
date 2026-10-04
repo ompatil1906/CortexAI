@@ -1,0 +1,31 @@
+{
+  "split": "test",
+  "rows": 600,
+  "distribution": {
+    "emotion": {
+      "classes": 5,
+      "majority": 0.27666666666666667
+    },
+    "urgency": {
+      "classes": 4,
+      "majority": 0.5583333333333333
+    },
+    "next_action": {
+      "classes": 37,
+      "majority": 0.23166666666666666
+    }
+  },
+  "reply_alignment": {
+    "agreement": 0.39285714285714285,
+    "baseline": 0.29646428571428574,
+    "z": 2.2953394058749947
+  },
+  "rouge_reference": {
+    "noise_floor": 0.1360461727402317,
+    "cross_domain": 0.12340110162484201
+  },
+  "gold_fabrication": {
+    "gold_amount_rate": 0.6366666666666667,
+    "gold_identifier_rate": 0.235
+  }
+}
