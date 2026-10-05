@@ -25,3 +25,9 @@ gradio>=5.0.0
 # the environment or in a .env file at the repo root:
 #   GEMINI_API_KEY=...      # or GOOGLE_API_KEY
 #   OPENAI_API_KEY=...
+
+# --- external / non-Apple-silicon use -------------------------------------
+# peft/final is a standard PEFT adapter and runs anywhere, including Linux and
+# Windows, but needs a torch/transformers stack instead of MLX:
+#   pip install torch transformers peft
+# See "Using the adapter outside MLX" in README.md.

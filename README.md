@@ -253,6 +253,100 @@ enum would score those two absent classes as 0.0 and understate the model.
 
 ---
 
+## Using the adapter outside MLX
+
+`peft/final/` is a **standard PEFT adapter**. It runs on any platform with a
+torch/transformers stack — Linux, Windows, or a Mac without MLX — and needs no
+Apple-silicon-specific dependency:
+
+```bash
+pip install torch transformers peft
+```
+
+```python
+import json
+import torch
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+BASE = "Qwen/Qwen2.5-1.5B-Instruct"          # the unquantised base
+ADAPTER = "peft/final"                       # this repo, or your HF repo id
+
+tok = AutoTokenizer.from_pretrained(BASE)
+model = PeftModel.from_pretrained(
+    AutoModelForCausalLM.from_pretrained(BASE, dtype=torch.bfloat16),
+    ADAPTER,
+).eval()
+
+fields = json.load(open("data/labeled/schema.json"))["fields"]
+prompt = tok.apply_chat_template(
+    [
+        {"role": "system", "content": (
+            "You are CortexAI, a customer support triage assistant.\n\n"
+            "Read the customer's support message and reply with a single JSON "
+            "object and nothing else.\nKeys, in this order:\n"
+            + "\n".join(f"- {name}" for name in fields)
+        )},
+        {"role": "user", "content": (
+            "Customer: Refund for order [ORDER_ID] still has not arrived.")},
+    ],
+    tokenize=False, add_generation_prompt=True,
+)
+
+ids = tok(prompt, return_tensors="pt", add_special_tokens=False).input_ids
+out = model.generate(ids, max_new_tokens=320, do_sample=False)
+print(json.loads(tok.decode(out[0][ids.shape[1]:], skip_special_tokens=True)))
+```
+
+Use the same five-field prompt as `scripts/prompts.py:short_system` for the tuned
+results reported above; the base model does much better with the longer prompt
+built by `full_system`.
+
+### Converting MLX → PEFT
+
+The adapter was trained with `mlx_lm`, which stores the two low-rank matrices in
+its own layout. `scripts/convert_to_peft.py` rewrites them into PEFT form:
+
+```bash
+./venv/bin/python3 scripts/convert_to_peft.py --adapter adapters/final --out peft/final
+./venv/bin/python3 scripts/verify_conversion.py        # proof it is faithful
+```
+
+Two details in that conversion are easy to get wrong, and **neither raises an
+error** — the adapter loads, runs, and emits perfectly well-formed JSON:
+
+- **Orientation.** For a `Linear(in, out)`, MLX stores `lora_a` as `[in, r]` and
+  `lora_b` as `[r, out]`; PEFT wants `lora_A` as `[r, in]` and `lora_B` as
+  `[out, r]`. So each matrix is **transposed**, with no change of role. Qwen's
+  `q_proj`/`o_proj` are square (1536×1536) and hide this mistake; only
+  `k_proj`/`v_proj` (1536→256, GQA) expose it.
+- **Scaling.** MLX applies `scale` directly; PEFT computes its multiplier as
+  `alpha / r`. Here `scale = 32`, so `lora_alpha` is `32 × 16 = 512` — an unusual
+  number that is nevertheless correct, since `512 / 16 = 32`.
+
+`scripts/verify_conversion.py` checks all three of: tensor shapes against the real
+model config, the effective weight update recomputed independently from MLX's own
+formula, and a forward pass against a hand-merged fp32 copy.
+
+Current status: shapes 0/224 wrong, effective updates identical (0.0e+00 relative
+error), forward argmax and logits matching to 1.7e-06.
+
+### One caveat: 4-bit vs fp32
+
+Training ran against `mlx-community/Qwen2.5-1.5B-Instruct-4bit`, but PEFT loads the
+**unquantised** `Qwen/Qwen2.5-1.5B-Instruct`. The adapter transfers exactly — the
+weight update is bit-identical — but the *base* weights differ, so predictions are
+not identical to the MLX run. Even with no adapter at all, the 4-bit and fp32 bases
+disagree on the argmax for the same token ids. The verified agreement above is
+therefore between two fp32 models, deliberately.
+
+In practice the labels agree: emotion and urgency matched on every spot-check, and
+`next_action` matched on 2 of 3 (the one difference fell in the field that is only
+~56% accurate even on the MLX side). If you need exact MLX numbers, use the MLX
+path in this repo; if you need portability, use PEFT.
+
+---
+
 ## Layout
 
 ```
@@ -293,4 +387,6 @@ command, so any run can be reproduced by hand.
 Code in this repository is provided as-is for evaluation. The source corpus is
 `CC0-1.0 (Public Domain)`. The base model is
 [`mlx-community/Qwen2.5-1.5B-Instruct-4bit`](https://huggingface.co/mlx-community/Qwen2.5-1.5B-Instruct-4bit),
-released under the Qwen Research license; review it before commercial use.
+**Apache 2.0**, so this derivative can be redistributed and used commercially
+under the same terms. Apache 2.0 §4(b)-(c) apply: mark the files as modified and
+retain the upstream attribution.
