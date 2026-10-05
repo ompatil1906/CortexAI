@@ -17,6 +17,38 @@ evaluation, demo — runs on the laptop; no GPU server and no paid API are neede
 
 ---
 
+## Published
+
+The fine-tune is released as [SupportLM V1.0.2](https://huggingface.co/Ompatil19/SupportLM_V1.0.2),
+a PEFT LoRA adapter, alongside the benchmark it was evaluated on,
+[SupportLM triage v1.0.2](https://huggingface.co/datasets/Ompatil19/SupportLM-triage-dataset).
+
+| | |
+|---|---|
+| Adapter | 4-bit base + LoRA, `r=16`, `alpha=512`, layers 12–27 |
+| Base model | `Qwen/Qwen2.5-1.5B-Instruct` |
+| Dataset | 4,000 / 600 / 600 split, CC0-1.0, synthetic, disjoint by `uid` |
+
+Load it anywhere PEFT runs, not just MLX:
+
+```python
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+base = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-1.5B-Instruct")
+model = PeftModel.from_pretrained(base, "Ompatil19/SupportLM_V1.0.2")
+```
+
+The exact weight mapping is documented under
+[Converting MLX → PEFT](#converting-mlx--peft) and checked numerically by
+`scripts/verify_conversion.py`.
+
+> The adapter was trained with `CortexAI` as the assistant name in the system
+> prompt; the Hub model card uses `SupportLM`. Nothing in the output depends on
+> the name, but see the caveat on that card.
+
+---
+
 ## Quick start
 
 ```bash

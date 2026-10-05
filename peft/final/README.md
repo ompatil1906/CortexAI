@@ -93,7 +93,7 @@ model = PeftModel.from_pretrained(
 ).eval()
 
 SYSTEM = (
-    "You are CortexAI, a customer support triage assistant.\n\n"
+    "You are SupportLM, a customer support triage assistant.\n\n"
     "Read the customer's support message and reply with a single JSON object "
     "and nothing else.\nKeys, in this order:\n"
     "- emotion\n- urgency\n- summary\n- next_action\n- suggested_reply\n\n"
@@ -119,8 +119,17 @@ out = model.generate(ids, max_new_tokens=320, do_sample=False)
 print(json.loads(tok.decode(out[0][ids.shape[1]:], skip_special_tokens=True)))
 ```
 
-The short prompt above is what the adapter was trained on. Substituting a
-different instruction format, or dropping the field list, will degrade results.
+The short prompt above is what the adapter was trained on: same instruction
+shape, same field list, same ordering. Substituting a different format or
+dropping the field list will degrade results.
+
+One caveat on the assistant name. Every fine-tuning row used a different persona
+name than the one shown here, so the name in the system prompt is a mild
+distribution shift the adapter has not seen. Predictions were identical in a
+10-row spot check, but this was not measured across the full test set, so treat
+the reported metrics as applying to the trained name. If you need the exact
+trained configuration, use that name in the prompt; nothing else in this card
+depends on it, since the persona never appears in the model's output.
 
 ### Out-of-Scope Use
 
