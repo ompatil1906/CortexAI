@@ -127,8 +127,10 @@ not directly comparable to the final run; the four rows above are, and they show
 Validation loss bottomed at iteration 1000 (0.172) and rose to 0.198 by 1200, yet the
 1200 checkpoint still won on the downstream metrics. Validation loss is per-token over
 the whole target *including reply prose*, so it does not track field accuracy exactly.
-Checkpoints at 400/800/1200 are kept under `adapters/ckpt*/` and the choice is recorded
-in `adapters/final/PROVENANCE.md`.
+Checkpoints at 400/800/1200 are kept as `adapters/final/0000400_adapters.safetensors`,
+`0000800_`, and `0001200_`; the 1200 checkpoint was copied to
+`adapters/final/adapters.safetensors` and the choice is recorded in
+`adapters/final/PROVENANCE.md`.
 
 **Read these against the baselines, not in isolation.** Every number below has a
 matching reference point, because several headline figures look alarming until
