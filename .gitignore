@@ -38,3 +38,4 @@ runs/
 .cache/
 *.log
 wandb/
+# --- local Space staging (deployed via hf upload --repo-type space) ---

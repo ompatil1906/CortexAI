@@ -1,0 +1,6 @@
+# `spaces`, `gradio` and `huggingface_hub` are preinstalled and platform-managed
+# by ZeroGPU. Pinning them breaks the runtime, so they are deliberately absent.
+# `torch` is likewise left unpinned; ZeroGPU supplies a compatible build.
+transformers>=4.44
+peft>=0.13
+accelerate>=0.34
