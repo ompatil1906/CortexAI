@@ -18,7 +18,7 @@ tags:
 - qwen2.5
 ---
 
-# Model Card for CortexAI — support ticket triage
+# Model Card for SupportLM V1.0.2 — support ticket triage
 
 A LoRA adapter that turns [`Qwen/Qwen2.5-1.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
 into a structured customer-support triage assistant. Given one support message it
@@ -37,13 +37,12 @@ returns a single JSON object with five fields: `emotion`, `urgency`, `summary`,
 - **Developed by:** Om Patil
 - **Model type:** LoRA adapter (PEFT) for a decoder-only text-generation model
 - **Language(s) (NLP):** English
-- **License:** apache-2.0 (adapter, as a derivative of the base model). Code in the source repository is MIT; the two intentionally differ — see [Provenance](#provenance).
+- **License:** apache-2.0, as a derivative of the base model.
 - **Finetuned from model:** [`Qwen/Qwen2.5-1.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
 
 ### Model Sources
 
-- **Repository:** [github.com/ompatil1906/CortexAI](https://github.com/ompatil1906/CortexAI) — training pipeline, evaluation scripts, and the MLX→PEFT converter
-- **Paper:** none. This is a personal project and has not been published.
+- **Paper:** none. This model has not been published in a paper.
 
 ### Intended inputs and outputs
 
@@ -62,7 +61,7 @@ object:
 
 `next_action` is drawn from a closed list of 42 constants (`FIX_PAYMENT`,
 `CHECK_SHIPMENT`, `PROCESS_REFUND`, `ESCALATE_HUMAN`, …). The full enumeration
-lives in `data/labeled/schema.json` in the source repository.
+The full enumeration of the 42 constants is listed in the Output format block above.
 
 The adapter is instructed to write unknown specifics as `[ORDER_ID]`, `[DATE]`
 or `[AMOUNT]` rather than inventing them.
@@ -90,7 +89,7 @@ BASE = "Qwen/Qwen2.5-1.5B-Instruct"
 tok = AutoTokenizer.from_pretrained(BASE)
 model = PeftModel.from_pretrained(
     AutoModelForCausalLM.from_pretrained(BASE, dtype=torch.bfloat16),
-    "ompatil1906/cortexai-support-triage",   # or a local path
+    "Ompatil19/SupportLM_V1.0.2",            # or a local path
 ).eval()
 
 SYSTEM = (
@@ -237,7 +236,7 @@ gradient checkpointing on, prompt tokens masked from the loss.
   favoured 1200, so 1200 was promoted.
 - The run was stopped at iteration 1350/2000. Per-token validation loss tracks the
   reply prose as much as the labels, so it is a weak model-selection signal; see
-  `adapters/final/PROVENANCE.md` in the source repository.
+  recorded in the checkpoint provenance for this release.
 - Full 2-epoch budget on this hardware is ~4h. The earlier 800-row pilot took
   34.3 minutes.
 
@@ -345,8 +344,8 @@ adapters are quantization-agnostic.
 No paper or blog post. If you cite this, cite the model card and the base model:
 
 ```bibtex
-@misc{cortexai_support_triage_2026,
-  title        = {CortexAI: support ticket triage LoRA adapter},
+@misc{supportlm_v1_0_2_2026,
+  title        = {SupportLM V1.0.2: support ticket triage LoRA adapter},
   author       = {Patil, Om},
   year         = {2026},
   howpublished = {Hugging Face model repository},
@@ -356,15 +355,13 @@ No paper or blog post. If you cite this, cite the model card and the base model:
 
 ## Provenance
 
-- **Adapter (this repository):** Apache-2.0, as a derivative of Qwen2.5-1.5B-Instruct.
+- **Adapter weights:** Apache-2.0, as a derivative of Qwen2.5-1.5B-Instruct.
   Per Apache-2.0 §4(b)–(c), redistribution must state the files were modified and
   retain upstream attribution.
-- **Code** (training pipeline, converters, evaluation): MIT.
 - **Training data:** synthetic, CC0-1.0.
 - **Base model:** Qwen2.5-1.5B-Instruct, Apache-2.0.
 
 ## Model Card Authors
 
-Om Patil. This card was written from the training and evaluation code in the
-source repository; every metric quoted here comes from `eval/final_tuned.json` and
-`eval/base_full.json` on a 600-row holdout.
+Om Patil. Every metric quoted on this card was measured on a 600-row held-out
+split with greedy decoding.
