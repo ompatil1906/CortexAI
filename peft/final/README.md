@@ -1,14 +1,20 @@
 ---
 license: apache-2.0
 library_name: peft
-tags:
-  - peft
-  - lora
-  - text-generation
-  - customer-support
-  - triage
-  - qwen2.5
+pipeline_tag: text-generation
 base_model: Qwen/Qwen2.5-1.5B-Instruct
+language:
+- en
+metrics:
+- accuracy
+- rouge
+tags:
+- peft
+- lora
+- text-generation
+- customer-support
+- triage
+- qwen2.5
 ---
 
 # CortexAI — support ticket triage (LoRA adapter)
@@ -37,7 +43,7 @@ BASE = "Qwen/Qwen2.5-1.5B-Instruct"
 tok = AutoTokenizer.from_pretrained(BASE)
 model = PeftModel.from_pretrained(
     AutoModelForCausalLM.from_pretrained(BASE, dtype=torch.bfloat16),
-    "your-org/cortexai-support-triage",   # or a local path
+    "ompatil1906/cortexai-support-triage",   # or a local path
 ).eval()
 
 SYSTEM = (
@@ -90,6 +96,8 @@ The adapter is instructed to write unknown specifics as `[ORDER_ID]`, `[DATE]`
 or `[AMOUNT]` rather than inventing them.
 
 ## Measured performance
+
+![Base vs adapter on 600 held-out tickets, and the failure modes that remain](results.png)
 
 600 held-out synthetic tickets, greedy decoding, single run. Base column is the
 same 600 tickets with no adapter.
@@ -151,5 +159,14 @@ expected.
 - Code, training pipeline, evaluation scripts, and this card: MIT.
 - This adapter (a derivative of Qwen2.5-1.5B-Instruct): Apache-2.0, matching the
   base model's license.
-- Training data: synthetic, generated CC0-1.0.
+- Training data: synthetic, generated CC0-1.0. The corpus is **not published as
+  a Hub dataset**, so there is no `datasets:` field above — the local corpus is
+  described here instead rather than attributed to an unrelated public dataset.
 - Base model: Qwen2.5-1.5B-Instruct, Apache-2.0.
+
+## Why there is no Eval Results entry
+
+The numbers above are measured on a private held-out split, so they are not
+expressible as Hub Eval Results. That mechanism requires a Hub dataset
+registered as a Benchmark with an `eval.yaml`, and would list the scores on a
+public leaderboard — which a private corpus cannot legitimately join.

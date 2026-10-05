@@ -19,6 +19,9 @@ scikit-learn>=1.5.0
 # demo
 gradio>=5.0.0
 
+# doc only: regenerates peft/final/results.png from eval/*.json
+# matplotlib>=3.8.0
+
 # --- labelling only -------------------------------------------------------
 # The labelling pipeline deliberately uses no SDK: scripts/llm_client.py speaks
 # HTTP through the standard library. A key is still required, supplied either in
