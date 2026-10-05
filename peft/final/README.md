@@ -193,9 +193,10 @@ small differences from the numbers below; this is expected, not a bug.
 sampled from a local corpus of 500,700 tickets (CC0-1.0, `llm_generated_v6_augmented`)
 covering 22 categories and 87 intents.
 
-**The corpus is not published as a Hub dataset.** There is deliberately no
-`datasets:` field in this card — the metadata field only accepts Hub dataset
-ids, and pointing at an unrelated public dataset would misrepresent provenance.
+The full 500,700-ticket source corpus is not published, but the exact
+4,000/600/600 split used here is, so the numbers below are reproducible:
+
+[`Ompatil19/SupportLM-triage-dataset`](https://huggingface.co/datasets/Ompatil19/SupportLM-triage-dataset)
 
 Splits are disjoint by `conversation_id` (verified zero overlap) so no near-duplicate
 ticket can appear in both train and test.
@@ -296,10 +297,11 @@ saturated) and produces well-formed, schema-valid output. It does not reliably
 ground the free-text reply in facts the customer supplied. Deployment value is in
 routing and queue prioritisation, not in automated replies.
 
-**Why there is no Eval Results entry.** Hub Eval Results (`.eval_results/*.yaml`)
-requires a Hub dataset registered as a Benchmark with an `eval.yaml`, and would
-publish these scores on a public leaderboard. These numbers come from a private
-held-out split, so they cannot join one without misrepresenting them.
+Scores can be submitted as Hub Eval Results against
+[`Ompatil19/SupportLM-triage-dataset`](https://huggingface.co/datasets/Ompatil19/SupportLM-triage-dataset),
+which is registered as a Benchmark via `eval.yaml`. The figures in the table
+above were measured on its `test` split and can be reproduced with
+`scripts/evaluate.py` in the training repository.
 
 ## Environmental Impact
 
@@ -334,10 +336,10 @@ adapters are quantization-agnostic.
 
 - Inference: `transformers` 5.18.0, `peft` 0.21.2, `torch` 2.14.1
 - Training: `mlx` / `mlx-lm` ≥0.32 (Apple Silicon only)
-- The adapter was converted from MLX format to PEFT by
-  `scripts/convert_to_peft.py`, verified by `scripts/verify_conversion.py`
-  (224/224 shapes correct, effective weight updates identical to 0.0e+00 relative
-  error, forward logits matching to 1.7e-06)
+- The adapter was converted from MLX format to PEFT and verified before release:
+  all 224 tensor shapes match the base model config, the effective weight updates
+  are identical to MLX's own to 0.0e+00 relative error, and forward logits match a
+  hand-merged fp32 reference to 1.7e-06.
 
 ## Citation
 

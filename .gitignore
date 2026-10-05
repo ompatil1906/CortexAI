@@ -23,6 +23,9 @@ data/llm_batches/
 data/labeled/
 data/sft/
 
+# --- HF staging tree (regenerate with scripts/stage_hf_upload.py) ---
+hf_upload/
+
 # --- model weights ---
 model/
 adapters/
